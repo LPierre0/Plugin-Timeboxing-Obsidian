@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf, setIcon } from "obsidian";
 import type { TaskPreset } from "../settings";
 import { buildTimeboxLayout, formatTimeLabel } from "../services/timebox-layout";
 import type { PositionedTaskBlock, TaskBlock, TimeRow } from "../types";
@@ -147,10 +147,12 @@ export class TimeboxingView extends ItemView {
 				target: this.contentEl,
 				props,
 			}) as unknown as TimeboxingViewComponentHandle;
+			this.applyIcons();
 			return;
 		}
 
 		this.component.$set(props);
+		this.applyIcons();
 	}
 
 	private updateCompactMode(): void {
@@ -245,6 +247,23 @@ export class TimeboxingView extends ItemView {
 
 			this.callbacks.onTimeSlotClick?.(parsedMinutes);
 		});
+	}
+
+	private applyIcons(): void {
+		const iconNodes = this.contentEl.querySelectorAll("[data-timeboxing-icon]");
+		for (let index = 0; index < iconNodes.length; index += 1) {
+			const node = iconNodes.item(index);
+			if (!(node instanceof HTMLElement)) {
+				continue;
+			}
+
+			const iconName = node.getAttribute("data-timeboxing-icon");
+			if (!iconName) {
+				continue;
+			}
+
+			setIcon(node, iconName);
+		}
 	}
 }
 

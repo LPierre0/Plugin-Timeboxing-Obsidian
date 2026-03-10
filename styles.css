@@ -88,10 +88,19 @@
 	font-size: var(--font-ui-smaller);
 	line-height: 1.2;
 	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 }
 
 .timeboxing-compact-start-btn:hover {
 	background: var(--background-modifier-hover);
+}
+
+.timeboxing-inline-icon {
+	display: inline-flex;
+	width: 14px;
+	height: 14px;
 }
 
 .timeboxing-canvas {
@@ -158,7 +167,7 @@
 	left: 56px;
 	right: 0;
 	height: 1px;
-	background: #ff3b30;
+	background: var(--text-error);
 	z-index: 3;
 	pointer-events: none;
 }
@@ -170,7 +179,7 @@
 	width: 7px;
 	height: 7px;
 	border-radius: 50%;
-	background: #ff3b30;
+	background: var(--text-error);
 }
 
 .timeboxing-task-block {

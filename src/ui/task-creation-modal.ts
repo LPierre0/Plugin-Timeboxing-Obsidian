@@ -27,6 +27,7 @@ export class TaskCreationModal extends Modal {
 	private startInputEl: HTMLInputElement | null = null;
 	private endInputEl: HTMLInputElement | null = null;
 	private colorInputEl: HTMLInputElement | null = null;
+	private readonly cleanupListeners: Array<() => void> = [];
 
 	constructor(app: App, options: TaskCreationModalOptions) {
 		super(app);
@@ -80,20 +81,23 @@ export class TaskCreationModal extends Modal {
 				void this.handleSubmit();
 			});
 
-		contentEl.addEventListener("keydown", (event: KeyboardEvent) => {
+		const onKeyDown = (event: KeyboardEvent): void => {
 			if (event.key !== "Enter") {
 				return;
 			}
 			event.preventDefault();
 			void this.handleSubmit();
-		});
+		};
+		contentEl.addEventListener("keydown", onKeyDown);
+		this.cleanupListeners.push(() => contentEl.removeEventListener("keydown", onKeyDown));
 
-		window.setTimeout(() => {
-			this.taskInput?.inputEl.focus();
-		}, 0);
+		this.taskInput?.inputEl.focus();
 	}
 
 	onClose(): void {
+		for (const cleanup of this.cleanupListeners.splice(0)) {
+			cleanup();
+		}
 		this.contentEl.empty();
 		this.taskInput = null;
 		this.startInputEl = null;
@@ -153,14 +157,16 @@ export class TaskCreationModal extends Modal {
 			buttonEl.style.borderColor = color;
 			buttonEl.style.color = color;
 
-			buttonEl.addEventListener("click", (event: MouseEvent) => {
+			const onPresetClick = (event: MouseEvent): void => {
 				event.preventDefault();
 				this.taskInput?.setValue(preset.name);
 				if (this.colorInputEl) {
 					this.colorInputEl.value = color;
 				}
 				this.taskInput?.inputEl.focus();
-			});
+			};
+			buttonEl.addEventListener("click", onPresetClick);
+			this.cleanupListeners.push(() => buttonEl.removeEventListener("click", onPresetClick));
 		}
 	}
 }

@@ -21,12 +21,14 @@
 		const widthPercent = 100 / task.columnCount;
 		const leftPercent = task.columnIndex * widthPercent;
 		const bgColor = task.color ?? "var(--interactive-accent)";
+		const textColor = getTaskTextColor(bgColor);
 		return [
 			`top: ${task.topPx}px`,
 			`height: ${task.heightPx}px`,
 			`left: calc(${leftPercent}% + 2px)`,
 			`width: calc(${widthPercent}% - 4px)`,
 			`background-color: ${bgColor}`,
+			`color: ${textColor}`,
 		].join(";");
 	}
 
@@ -35,6 +37,25 @@
 			return "";
 		}
 		return `${formatTimeLabel(task.startMinutes)} - ${formatTimeLabel(task.endMinutes)}`;
+	}
+
+	function getTaskTextColor(backgroundColor) {
+		if (typeof backgroundColor !== "string") {
+			return "var(--text-on-accent)";
+		}
+
+		const match = /^#([0-9a-fA-F]{6})$/u.exec(backgroundColor.trim());
+		if (!match || !match[1]) {
+			return "var(--text-on-accent)";
+		}
+
+		const hex = match[1];
+		const red = Number.parseInt(hex.slice(0, 2), 16);
+		const green = Number.parseInt(hex.slice(2, 4), 16);
+		const blue = Number.parseInt(hex.slice(4, 6), 16);
+		const luminance = ((0.2126 * red) + (0.7152 * green) + (0.0722 * blue)) / 255;
+
+		return luminance > 0.62 ? "#101010" : "#ffffff";
 	}
 </script>
 
@@ -50,9 +71,12 @@
 					<div class="timeboxing-compact-task-time">{formatTaskRange(nowTask)}</div>
 					{#if nowTask.checkState === "/"}
 						<div class="timeboxing-compact-running">Running</div>
-					{:else if nowTaskIndex !== null}
-						<button class="timeboxing-compact-start-btn" data-task-index={nowTaskIndex}>Start</button>
-					{/if}
+						{:else if nowTaskIndex !== null}
+							<button class="timeboxing-compact-start-btn" data-task-index={nowTaskIndex}>
+								<span class="timeboxing-inline-icon" data-timeboxing-icon="play"></span>
+								<span>Start</span>
+							</button>
+						{/if}
 				{:else}
 					<div class="timeboxing-compact-empty">No task running</div>
 				{/if}
@@ -63,9 +87,12 @@
 				{#if nextTask}
 					<div class="timeboxing-compact-task-name">{nextTask.label}</div>
 					<div class="timeboxing-compact-task-time">{formatTaskRange(nextTask)}</div>
-					{#if nextTaskIndex !== null}
-						<button class="timeboxing-compact-start-btn" data-task-index={nextTaskIndex}>Start</button>
-					{/if}
+						{#if nextTaskIndex !== null}
+							<button class="timeboxing-compact-start-btn" data-task-index={nextTaskIndex}>
+								<span class="timeboxing-inline-icon" data-timeboxing-icon="play"></span>
+								<span>Start</span>
+							</button>
+						{/if}
 				{:else}
 					<div class="timeboxing-compact-empty">No upcoming task</div>
 				{/if}
