@@ -1,90 +1,113 @@
-# Obsidian Sample Plugin
+# Timeboxing for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Daily-note-first timeboxing view for Obsidian, with a central planning canvas and a compact sidebar monitor.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Screenshots
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+### Main timeboxing view
 
-## First time developing plugins?
+![Timeboxing main view](Images/Timeboxing.png)
 
-Quick starting guide for new plugin devs:
+### Right sidebar monitoring view
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+![Timeboxing sidebar view](Images/Sidebar.png)
 
-## Releasing new releases
+## Highlights
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+- Daily note as single source of truth (auto-created if missing).
+- Timeline with dynamic range (default 08:00–22:00, auto-extends when needed).
+- Overlap-aware layout (concurrent tasks are displayed side by side).
+- Click a time slot to create a task.
+- Click a task block to edit name, time range, and color.
+- Presets (name + color) for fast task creation.
+- Compact right-sidebar mode with **Now / Next** monitoring.
+- One-click **Start** action in compact mode (`- [ ]` -> `- [/]` + `started_at`).
+- Live refresh when the daily note changes.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## Task format
 
-## Adding your plugin to the community plugin list
+The plugin reads Markdown tasks from the current daily note:
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```md
+- [ ] Deep work [start:: 09:00] [end:: 11:00]
+- [/] Review PRs [start:: 11:00] [end:: 11:30] [color:: #ff9f0a]
 ```
 
-If you have multiple URLs, you can also do:
+Supported fields:
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+- Required: `[start:: HH:mm]`, `[end:: HH:mm]`
+- Optional: `[color:: #RRGGBB]`
+- Internal (managed by plugin): `[tbid:: ...]`
+- Any other inline Dataview fields are preserved.
+
+## Commands
+
+- `Open Timebox`: open the main timeboxing view.
+- `Open timebox in right sidebar`: open compact monitoring view.
+
+## Settings
+
+- **Time slot step**: `15` or `30` minutes.
+- **Task presets**: configure preset name + color for quick creation.
+
+## Quick start
+
+1. Run **Open Timebox**.
+2. Click on a timeline slot to create a task.
+3. Edit by clicking an existing task block.
+4. Open **Open timebox in right sidebar** for compact monitoring.
+5. Use **Start** on `Now` or `Next` from the sidebar when you begin working.
+
+## Installation
+
+### Community plugins (once published)
+
+1. Open **Settings -> Community plugins**.
+2. Search for **Timeboxing**.
+3. Install and enable.
+
+### Manual
+
+1. Build or download release assets.
+2. Copy `main.js`, `manifest.json`, `styles.css` into:
+
+```text
+<Vault>/.obsidian/plugins/timeboxing/
 ```
 
-## API Documentation
+3. Reload Obsidian and enable **Timeboxing**.
 
-See https://docs.obsidian.md
+## Development
+
+Requirements:
+
+- Node.js 18+
+- npm
+
+Commands:
+
+```bash
+npm install
+npm run dev
+npm run lint
+npm run test
+npm run build
+```
+
+## Release process
+
+1. Bump version in `manifest.json` and `package.json`.
+2. Update `versions.json`.
+3. Build release assets with `npm run build`.
+4. Create GitHub release with tag matching the version (for example `1.1.0`).
+5. Attach `main.js`, `manifest.json`, `styles.css` as release assets.
+
+## Privacy and scope
+
+- Local-first plugin.
+- No telemetry.
+- No external service required for core functionality.
+
+## License
+
+0BSD
